@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Privacy Policy — SplitFree</title>
+<meta name="description" content="What SplitFree collects, why, and how to delete it." />
+<style>
+  :root {
+    --bg: #fdfbf7;
+    --fg: #1c1917;
+    --muted: #6b6560;
+    --plum: #78124e;
+    --line: #e7e2da;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#121011; --fg:#f5f3f0; --muted:#a8a29e; --plum:#e879b9; --line:#2a2627; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 46rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+  .brand { display: flex; align-items: center; gap: .6rem; font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; }
+  .dot { width: .55rem; height: .55rem; border-radius: 999px; background: var(--plum); }
+  h1 { font-size: 1.9rem; letter-spacing: -0.02em; margin: 1.25rem 0 .35rem; }
+  h2 { font-size: 1.15rem; letter-spacing: -0.01em; margin: 2.25rem 0 .6rem; }
+  .sub { color: var(--muted); font-size: .9rem; margin: 0; }
+  p, li { color: var(--fg); }
+  .lead { font-size: 1.02rem; }
+  ul { padding-left: 1.15rem; }
+  li { margin: .3rem 0; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .92rem; }
+  th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; }
+  code { background: color-mix(in oklab, var(--fg) 8%, transparent); padding: .1rem .35rem; border-radius: .3rem; font-size: .88em; }
+  a { color: var(--plum); }
+  .note { border-left: 3px solid var(--plum); padding: .1rem 0 .1rem 1rem; margin: 1.25rem 0; color: var(--muted); }
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="dot"></span> SplitFree</div>
+  </header>
+
+  <h1>Privacy Policy</h1>
+  <p class="sub">Last updated 29 July 2026 · applies to the SplitFree Android app (<code>app.splitfree.client</code>)</p>
+
+  <p class="lead">SplitFree splits bills between friends. It does not show ads, does not track you across
+  other apps or websites, and contains no analytics or advertising SDK. It does not request your
+  advertising ID.</p>
+
+  <h2>What is collected, and why</h2>
+  <table>
+    <tr><th>Data</th><th>Why</th><th>Required?</th></tr>
+    <tr><td>Name / username</td><td>So other people recognise you in a group</td><td>Required</td></tr>
+    <tr><td>Email address</td><td>Sign-in, and so friends can find you</td><td>Required</td></tr>
+    <tr><td>UPI ID</td><td>Shown to someone paying you back, so they can pay in one tap</td><td>Optional</td></tr>
+    <tr><td>Profile photo</td><td>Shown next to your name</td><td>Optional</td></tr>
+    <tr><td>Expenses, splits, settlements</td><td>The ledger — the purpose of the app</td><td>Required</td></tr>
+    <tr><td>Payment screenshots</td><td>Only if you attach one as proof of a payment</td><td>Optional</td></tr>
+    <tr><td>Notification token</td><td>To deliver reminders. Only if you allow notifications</td><td>Optional</td></tr>
+  </table>
+
+  <p>Location, contacts, calendar, SMS, call logs, microphone, and health data are
+  <strong>never</strong> accessed. The app declares no permission for any of them.</p>
+
+  <h2>Who it is shared with</h2>
+  <p>Your data is not sold, and not shared with advertisers or data brokers. It is processed by two
+  providers acting on our behalf:</p>
+  <ul>
+    <li><strong>Supabase</strong> — hosts the database and file storage.</li>
+    <li><strong>Google Firebase Cloud Messaging</strong> — delivers push notifications, if you enable them.</li>
+  </ul>
+  <p>Other people see only what the app shows them: your name, photo, and the expenses you actually
+  share with them. Someone you share nothing with cannot see your ledger.</p>
+
+  <div class="note">
+    Notification text can include an amount and a name (for example, a payment reminder). If your
+    phone is set to show notification content on the lock screen, that text is visible there. You can
+    change this in Android under Settings → Notifications → Sensitive notifications.
+  </div>
+
+  <h2>How long it is kept</h2>
+  <p>Your data is kept while your account exists. Delete your account and it is removed. Expenses that
+  other people are still party to are anonymised rather than erased, so that their ledger stays
+  correct — your name is replaced and your email, UPI ID and photo are removed.</p>
+
+  <h2>Deleting your account</h2>
+  <p>In the app: <strong>Account → Settings → Delete account</strong>. Balances must be settled first,
+  so nobody is left with a debt pointing at a deleted person. Deletion removes your profile, email,
+  UPI ID, photo, payment screenshots, notification tokens and activity history.</p>
+  <p>If you cannot access the app, email the address below from your registered address and it will be
+  done manually.</p>
+
+  <h2>Security</h2>
+  <p>All traffic uses HTTPS. Files are stored in private buckets and served through short-lived
+  signed links. Access is enforced in the database itself, per row, so the server refuses data you
+  are not party to rather than relying on the app to hide it.</p>
+
+  <h2>Children</h2>
+  <p>SplitFree is not directed at children under 13 and does not knowingly collect their data.</p>
+
+  <h2>Changes</h2>
+  <p>If this policy changes materially, the date above changes and the app will show a notice.</p>
+
+  <h2>Contact</h2>
+  <p>Questions, or a data request: <a href="mailto:justutsav.05@gmail.com">justutsav.05@gmail.com</a></p>
+
+  <footer>
+    SplitFree · Free forever, no ads, no tracking.
+  </footer>
+</div>
+</body>
+</html>
