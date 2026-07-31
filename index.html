@@ -49,7 +49,7 @@
   </header>
 
   <h1>Privacy Policy</h1>
-  <p class="sub">Last updated 29 July 2026 · applies to the SplitFree Android app (<code>app.splitfree.client</code>)</p>
+  <p class="sub">Last updated 31 July 2026 · applies to the SplitFree Android app (<code>app.splitfree.client</code>)</p>
 
   <p class="lead">SplitFree splits bills between friends. It does not show ads, does not track you across
   other apps or websites, and contains no analytics or advertising SDK. It does not request your
@@ -90,8 +90,12 @@
   <p>Your data is kept while your account exists. Delete your account and it is removed. Expenses that
   other people are still party to are anonymised rather than erased, so that their ledger stays
   correct — your name is replaced and your email, UPI ID and photo are removed.</p>
+  <p>Deletion happens immediately, not on a delay, and there is no waiting period in which the
+  account can be restored. Anonymised entries have no personal detail left in them and are kept for
+  as long as the other people involved keep their own records. Routine encrypted backups may still
+  hold a copy for a few days before they are overwritten.</p>
 
-  <h2>Deleting your account</h2>
+  <h2 id="delete-account">Deleting your account</h2>
   <p>In the app: <strong>Account → Settings → Delete account</strong>. Balances must be settled first,
   so nobody is left with a debt pointing at a deleted person. Deletion removes your profile, email,
   UPI ID, photo, payment screenshots, notification tokens and activity history.</p>
@@ -99,9 +103,9 @@
   done manually.</p>
 
   <h2>Security</h2>
-  <p>All traffic uses HTTPS. Files are stored in private buckets and served through short-lived
-  signed links. Access is enforced in the database itself, per row, so the server refuses data you
-  are not party to rather than relying on the app to hide it.</p>
+  <p>All traffic is encrypted. Photos and screenshots are stored privately and shown through links
+  that expire after a few minutes. Permission checks happen on the server rather than in the app, so
+  data you are not party to is never sent to your phone in the first place.</p>
 
   <h2>Children</h2>
   <p>SplitFree is not directed at children under 13 and does not knowingly collect their data.</p>
