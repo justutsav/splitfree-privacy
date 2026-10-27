@@ -1,124 +1,189 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-IN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Privacy Policy — SplitFree</title>
-<meta name="description" content="What SplitFree collects, why, and how to delete it." />
-<style>
-  :root {
-    --bg: #fdfbf7;
-    --fg: #1c1917;
-    --muted: #6b6560;
-    --plum: #78124e;
-    --line: #e7e2da;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#121011; --fg:#f5f3f0; --muted:#a8a29e; --plum:#e879b9; --line:#2a2627; }
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--fg);
-    font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    -webkit-text-size-adjust: 100%;
-  }
-  .wrap { max-width: 46rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
-  header { border-bottom: 1px solid var(--line); padding-bottom: 1.5rem; margin-bottom: 2rem; }
-  .brand { display: flex; align-items: center; gap: .6rem; font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; }
-  .dot { width: .55rem; height: .55rem; border-radius: 999px; background: var(--plum); }
-  h1 { font-size: 1.9rem; letter-spacing: -0.02em; margin: 1.25rem 0 .35rem; }
-  h2 { font-size: 1.15rem; letter-spacing: -0.01em; margin: 2.25rem 0 .6rem; }
-  .sub { color: var(--muted); font-size: .9rem; margin: 0; }
-  p, li { color: var(--fg); }
-  .lead { font-size: 1.02rem; }
-  ul { padding-left: 1.15rem; }
-  li { margin: .3rem 0; }
-  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .92rem; }
-  th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; }
-  code { background: color-mix(in oklab, var(--fg) 8%, transparent); padding: .1rem .35rem; border-radius: .3rem; font-size: .88em; }
-  a { color: var(--plum); }
-  .note { border-left: 3px solid var(--plum); padding: .1rem 0 .1rem 1rem; margin: 1.25rem 0; color: var(--muted); }
-  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SplitFree: split bills, settle on UPI</title>
+<meta name="description" content="SplitFree is a free Android app for splitting bills with friends to the paisa, reminding them, splitting shop payments and settling up on UPI. No ads, no tracking.">
+<meta name="theme-color" content="#1c0612">
+<link rel="canonical" href="https://splitfree.justutsav.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://splitfree.justutsav.com/">
+<meta property="og:title" content="SplitFree: split bills, settle on UPI">
+<meta property="og:description" content="Split bills with friends to the paisa, then settle up on UPI. Free forever, with no ads.">
+<meta property="og:image" content="https://splitfree.justutsav.com/assets/img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/img/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/img/icon-180.png">
+<link rel="preload" href="/assets/fonts/anek-latin-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/literata-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/fonts.css">
+<link rel="stylesheet" href="/assets/css/site.css">
+<script src="/assets/js/boot.js"></script>
+<link rel="modulepreload" href="/assets/js/stage.js">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"MobileApplication","name":"SplitFree","operatingSystem":"Android","applicationCategory":"FinanceApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"downloadUrl":"https://play.google.com/store/apps/details?id=app.splitfree.client"}
+</script>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="brand"><span class="dot"></span> SplitFree</div>
-  </header>
+<a class="skip" href="#main">Skip to content</a>
 
-  <h1>Privacy Policy</h1>
-  <p class="sub">Last updated 31 July 2026 · applies to the SplitFree Android app (<code>app.splitfree.client</code>)</p>
+<!-- The opening, as the app opens: "SplitFree" written on paper in plum, from
+     the app's own wordmark outlines. Then a coin turns over and the site is
+     on the other side of it. -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-sheet">
+  <div class="loader-paper"></div>
+  <div class="loader-word">
+    <svg class="loader-mark" viewBox="2.9 -75.1 423.8 96.2" role="img" aria-label="SplitFree"><path style="--i:0" pathLength="1" d="M6.7 -6.9Q4.0 -9.3 4.0 -12.2Q4.0 -14.5 5.7 -16.2Q7.4 -18.0 9.8 -18.0Q11.7 -18.0 13.2 -16.8Q17.2 -13.5 21.0 -12.0Q24.8 -10.5 30.0 -10.5Q35.6 -10.5 39.7 -13.0Q43.7 -15.5 43.7 -19.2Q43.7 -23.7 39.7 -26.2Q35.7 -28.8 27.0 -30.1Q5.1 -33.3 5.1 -50.5Q5.1 -56.8 8.4 -61.5Q11.7 -66.1 17.4 -68.6Q23.1 -71.0 30.1 -71.0Q36.4 -71.0 42.0 -69.1Q47.5 -67.2 51.2 -64.1Q54.1 -61.8 54.1 -58.8Q54.1 -56.5 52.4 -54.8Q50.7 -53.0 48.4 -53.0Q46.9 -53.0 45.7 -53.9Q43.1 -56.0 38.5 -57.8Q33.8 -59.5 30.1 -59.5Q23.8 -59.5 20.4 -57.2Q16.9 -54.8 16.9 -51.0Q16.9 -46.7 20.5 -44.5Q24.0 -42.3 31.6 -40.9Q40.2 -39.4 45.4 -37.1Q50.5 -34.7 53.1 -30.7Q55.7 -26.6 55.7 -19.9Q55.7 -13.6 52.2 -8.9Q48.6 -4.1 42.7 -1.6Q36.8 1.0 30.0 1.0Q22.8 1.0 17.2 -0.8Q11.6 -2.6 6.7 -6.9Z"/><path style="--i:1" pathLength="1" d="M118.5 -26.8Q118.5 -18.8 115.3 -12.5Q112.1 -6.1 106.6 -2.6Q101.0 1.0 94.3 1.0Q89.5 1.0 85.2 -1.0Q81.0 -2.9 78.2 -5.7V13.9Q78.2 16.5 76.5 18.2Q74.8 20.0 72.2 20.0Q69.6 20.0 67.9 18.3Q66.2 16.6 66.2 13.9V-47.4Q66.2 -50.0 67.9 -51.8Q69.6 -53.5 72.2 -53.5Q74.8 -53.5 76.5 -51.8Q78.2 -50.0 78.2 -47.4V-47.0Q80.6 -50.0 84.9 -52.2Q89.2 -54.5 93.9 -54.5Q100.8 -54.5 106.4 -51.0Q112.0 -47.4 115.2 -41.1Q118.5 -34.8 118.5 -26.8ZM107.0 -26.8Q107.0 -34.0 103.0 -38.8Q98.9 -43.5 92.4 -43.5Q85.9 -43.5 81.8 -38.8Q77.7 -34.0 77.7 -26.8Q77.7 -19.6 81.8 -14.8Q85.9 -10.0 92.4 -10.0Q98.8 -10.0 102.9 -14.8Q107.0 -19.6 107.0 -26.8Z"/><path style="--i:2" pathLength="1" d="M135.4 0.0Q132.9 0.0 131.2 -1.8Q129.5 -3.5 129.5 -6.1V-67.9Q129.5 -70.5 131.2 -72.2Q133.0 -74.0 135.6 -74.0Q138.1 -74.0 139.8 -72.2Q141.5 -70.5 141.5 -67.9V-6.1Q141.5 -3.5 139.8 -1.8Q138.0 0.0 135.4 0.0Z"/><path style="--i:3" pathLength="1" d="M160.8 0.0Q158.2 0.0 156.5 -1.8Q154.8 -3.5 154.8 -6.1V-47.4Q154.8 -50.0 156.5 -51.8Q158.2 -53.5 160.8 -53.5Q163.4 -53.5 165.1 -51.8Q166.8 -50.0 166.8 -47.4V-6.1Q166.8 -3.5 165.1 -1.8Q163.4 0.0 160.8 0.0ZM154.5 -65.0V-66.9Q154.5 -69.7 156.0 -70.8Q157.5 -71.9 160.8 -71.9Q164.3 -71.9 165.7 -70.8Q167.1 -69.7 167.1 -66.9V-65.0Q167.1 -62.1 165.6 -61.0Q164.2 -60.0 160.7 -60.0Q157.3 -60.0 155.9 -61.1Q154.5 -62.2 154.5 -65.0Z"/><path style="--i:4" pathLength="1" d="M208.6 -6.4Q208.6 -3.7 205.6 -1.9Q202.7 0.0 199.0 0.0Q192.8 0.0 188.6 -2.7Q184.3 -5.3 184.3 -13.9V-41.5H179.7Q177.3 -41.5 175.7 -43.1Q174.1 -44.7 174.1 -47.1Q174.1 -49.4 175.7 -51.0Q177.3 -52.5 179.7 -52.5H184.3V-58.9Q184.3 -61.5 186.0 -63.2Q187.8 -65.0 190.4 -65.0Q192.9 -65.0 194.6 -63.2Q196.3 -61.5 196.3 -58.9V-52.5H203.4Q205.8 -52.5 207.4 -50.9Q209.0 -49.3 209.0 -46.9Q209.0 -44.6 207.4 -43.0Q205.8 -41.5 203.4 -41.5H196.3V-14.4Q196.3 -12.3 197.4 -11.4Q198.5 -10.4 200.4 -10.4Q201.2 -10.4 202.6 -10.8Q203.8 -11.3 204.9 -11.3Q206.3 -11.3 207.4 -9.9Q208.6 -8.6 208.6 -6.4Z"/><path style="--i:5" pathLength="1" d="M233.5 -58.5V-40.9H255.1Q257.7 -40.9 259.4 -39.2Q261.2 -37.6 261.2 -35.0Q261.2 -32.8 259.4 -31.1Q257.7 -29.4 255.1 -29.4H233.5V-6.1Q233.5 -3.5 231.7 -1.8Q229.8 0.0 227.3 0.0Q224.5 0.0 222.8 -1.7Q221.0 -3.4 221.0 -6.1V-63.9Q221.0 -66.5 222.8 -68.2Q224.5 -70.0 227.1 -70.0H259.6Q262.2 -70.0 263.9 -68.3Q265.7 -66.7 265.7 -64.1Q265.7 -61.9 263.9 -60.2Q262.2 -58.5 259.6 -58.5Z"/><path style="--i:6" pathLength="1" d="M311.1 -48.8Q311.1 -45.7 309.5 -44.2Q307.9 -42.6 305.7 -42.6Q304.2 -42.6 302.3 -43.3Q302.0 -43.4 300.9 -43.7Q299.9 -44.0 298.7 -44.0Q296.1 -44.0 293.7 -42.4Q291.3 -40.8 289.8 -37.6Q288.2 -34.3 288.2 -29.8V-6.1Q288.2 -3.5 286.5 -1.8Q284.8 0.0 282.2 0.0Q279.6 0.0 277.9 -1.8Q276.2 -3.5 276.2 -6.1V-47.4Q276.2 -50.0 277.9 -51.8Q279.6 -53.5 282.2 -53.5Q284.8 -53.5 286.5 -51.8Q288.2 -50.0 288.2 -47.4V-46.1Q290.5 -50.2 294.8 -52.4Q299.1 -54.5 304.0 -54.5Q307.0 -54.5 309.1 -52.8Q311.1 -51.1 311.1 -48.8Z"/><path style="--i:7" pathLength="1" d="M361.5 -22.6H328.5Q329.7 -16.7 334.0 -13.3Q338.3 -10.0 343.7 -10.0Q347.8 -10.0 350.1 -10.8Q352.4 -11.5 353.8 -12.4Q355.1 -13.2 355.6 -13.5Q357.4 -14.4 359.0 -14.4Q361.1 -14.4 362.6 -12.9Q364.1 -11.4 364.1 -9.4Q364.1 -6.7 361.3 -4.5Q358.5 -2.2 353.8 -0.6Q349.1 1.0 344.3 1.0Q335.9 1.0 329.7 -2.5Q323.4 -6.0 320.0 -12.2Q316.6 -18.3 316.6 -26.0Q316.6 -34.6 320.2 -41.1Q323.8 -47.6 329.7 -51.0Q335.6 -54.5 342.3 -54.5Q348.9 -54.5 354.8 -50.9Q360.6 -47.3 364.1 -41.2Q367.6 -35.1 367.6 -28.0Q367.5 -25.6 365.7 -24.1Q363.9 -22.6 361.5 -22.6ZM328.6 -32.6H354.8V-33.3Q354.4 -37.5 350.7 -40.5Q347.0 -43.5 342.3 -43.5Q330.7 -43.5 328.6 -32.6Z"/><path style="--i:8" pathLength="1" d="M419.5 -22.6H386.5Q387.7 -16.7 392.0 -13.3Q396.3 -10.0 401.7 -10.0Q405.8 -10.0 408.1 -10.8Q410.4 -11.5 411.8 -12.4Q413.1 -13.2 413.6 -13.5Q415.4 -14.4 417.0 -14.4Q419.1 -14.4 420.6 -12.9Q422.1 -11.4 422.1 -9.4Q422.1 -6.7 419.3 -4.5Q416.5 -2.2 411.8 -0.6Q407.1 1.0 402.3 1.0Q393.9 1.0 387.7 -2.5Q381.4 -6.0 378.0 -12.2Q374.6 -18.3 374.6 -26.0Q374.6 -34.6 378.2 -41.1Q381.8 -47.6 387.7 -51.0Q393.6 -54.5 400.3 -54.5Q406.9 -54.5 412.8 -50.9Q418.6 -47.3 422.1 -41.2Q425.6 -35.1 425.6 -28.0Q425.5 -25.6 423.7 -24.1Q421.9 -22.6 419.5 -22.6ZM386.6 -32.6H412.8V-33.3Q412.4 -37.5 408.7 -40.5Q405.0 -43.5 400.3 -43.5Q388.7 -43.5 386.6 -32.6Z"/></svg>
+    <p class="loader-tag">Split bills, stay friends</p>
+  </div>
+  <div class="loader-waves"><i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i></div>
+  </div>
+  <div class="loader-coin" id="loader-coin">
+    <div class="coin-trail"><i></i><i></i><i></i></div>
+    <div class="coin3d">
+      <img class="coin3d-face" src="/assets/coins/settle-king-face.svg" width="160" height="160" alt="" draggable="false">
+      <img class="coin3d-face coin3d-back" src="/assets/img/icon-192.png" width="160" height="160" alt="" draggable="false">
+      <div class="coin3d-face coin3d-ring"></div>
+      <div class="coin3d-edge"><i style="--a:0.00deg"></i><i style="--a:10.00deg"></i><i style="--a:20.00deg"></i><i style="--a:30.00deg"></i><i style="--a:40.00deg"></i><i style="--a:50.00deg"></i><i style="--a:60.00deg"></i><i style="--a:70.00deg"></i><i style="--a:80.00deg"></i><i style="--a:90.00deg"></i><i style="--a:100.00deg"></i><i style="--a:110.00deg"></i><i style="--a:120.00deg"></i><i style="--a:130.00deg"></i><i style="--a:140.00deg"></i><i style="--a:150.00deg"></i><i style="--a:160.00deg"></i><i style="--a:170.00deg"></i><i style="--a:180.00deg"></i><i style="--a:190.00deg"></i><i style="--a:200.00deg"></i><i style="--a:210.00deg"></i><i style="--a:220.00deg"></i><i style="--a:230.00deg"></i><i style="--a:240.00deg"></i><i style="--a:250.00deg"></i><i style="--a:260.00deg"></i><i style="--a:270.00deg"></i><i style="--a:280.00deg"></i><i style="--a:290.00deg"></i><i style="--a:300.00deg"></i><i style="--a:310.00deg"></i><i style="--a:320.00deg"></i><i style="--a:330.00deg"></i><i style="--a:340.00deg"></i><i style="--a:350.00deg"></i></div>
+    </div>
+  </div>
+</div>
 
-  <p class="lead">SplitFree splits bills between friends. It does not show ads, does not track you across
-  other apps or websites, and contains no analytics or advertising SDK. It does not request your
-  advertising ID.</p>
+<header class="nav" id="nav">
+  <a class="nav-mark" href="#top" aria-label="SplitFree, back to the top">splitfree</a>
+  <nav aria-label="Main">
+    <a href="#story">How it works</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#get">Questions</a>
+    <a class="nav-action" href="https://play.google.com/store/apps/details?id=app.splitfree.client">Get the app</a>
+  </nav>
+</header>
 
-  <h2>What is collected, and why</h2>
-  <table>
-    <tr><th>Data</th><th>Why</th><th>Required?</th></tr>
-    <tr><td>Name / username</td><td>So other people recognise you in a group</td><td>Required</td></tr>
-    <tr><td>Email address</td><td>Sign-in, and so friends can find you</td><td>Required</td></tr>
-    <tr><td>UPI ID</td><td>Shown to someone paying you back, so they can pay in one tap</td><td>Optional</td></tr>
-    <tr><td>Profile photo</td><td>Shown next to your name</td><td>Optional</td></tr>
-    <tr><td>Expenses, splits, settlements</td><td>The ledger — the purpose of the app</td><td>Required</td></tr>
-    <tr><td>Payment screenshots</td><td>Only if you attach one as proof of a payment</td><td>Optional</td></tr>
-    <tr><td>Notification token</td><td>To deliver reminders. Only if you allow notifications</td><td>Optional</td></tr>
-  </table>
+<main id="main">
+<div class="scene" id="top">
 
-  <p>Location, contacts, calendar, SMS, call logs, microphone, and health data are
-  <strong>never</strong> accessed. The app declares no permission for any of them.</p>
-
-  <h2>Who it is shared with</h2>
-  <p>Your data is not sold, and not shared with advertisers or data brokers. It is processed by two
-  providers acting on our behalf:</p>
-  <ul>
-    <li><strong>Supabase</strong> — hosts the database and file storage.</li>
-    <li><strong>Google Firebase Cloud Messaging</strong> — delivers push notifications, if you enable them.</li>
-  </ul>
-  <p>Other people see only what the app shows them: your name, photo, and the expenses you actually
-  share with them. Someone you share nothing with cannot see your ledger.</p>
-
-  <div class="note">
-    Notification text can include an amount and a name (for example, a payment reminder). If your
-    phone is set to show notification content on the lock screen, that text is visible there. You can
-    change this in Android under Settings → Notifications → Sensitive notifications.
+  <!-- One 3D scene behind the first five screens: the phone with the app's coin
+       faces around it, then the phone alone, turning to face each chapter. -->
+  <div class="stage" id="stage" aria-hidden="true" data-ch="-1">
+    <canvas id="stage-canvas"></canvas>
+    <div class="phone-dom" id="phone-dom">
+      <img src="/assets/shots/home.webp" width="824" height="1830" alt="" draggable="false">
+      <video muted playsinline preload="none" width="720" height="1600"></video>
+    </div>
+    <div class="stage-ui" id="stage-ui">
+      <div class="tags" id="tags"></div>
+    </div>
   </div>
 
-  <h2>How long it is kept</h2>
-  <p>Your data is kept while your account exists. Delete your account and it is removed. Expenses that
-  other people are still party to are anonymised rather than erased, so that their ledger stays
-  correct — your name is replaced and your email, UPI ID and photo are removed.</p>
-  <p>Deletion happens immediately, not on a delay, and there is no waiting period in which the
-  account can be restored. Anonymised entries have no personal detail left in them and are kept for
-  as long as the other people involved keep their own records. Routine encrypted backups may still
-  hold a copy for a few days before they are overwritten.</p>
+  <div class="flow">
+  <section class="hero" aria-labelledby="hero-title" data-ground="dark">
+    <h1 id="hero-title" class="wordmark"><span>split</span><span>free</span></h1>
+    <div class="hero-copy">
+      <p class="hero-line">Split bills with friends to the paisa, then settle up on UPI. Free forever, with no ads.</p>
+      <a class="btn btn-light" href="https://play.google.com/store/apps/details?id=app.splitfree.client">Get it on Google Play</a>
+    </div>
+  </section>
 
-  <h2 id="delete-account">Deleting your account</h2>
-  <p>In the app: <strong>Account → Settings → Delete account</strong>. Balances must be settled first,
-  so nobody is left with a debt pointing at a deleted person. Deletion removes your profile, email,
-  UPI ID, photo, payment screenshots, notification tokens and activity history.</p>
-  <p>If you cannot access the app, email the address below from your registered address and it will be
-  done manually.</p>
-
-  <h2>Security</h2>
-  <p>All traffic is encrypted. Photos and screenshots are stored privately and shown through links
-  that expire after a few minutes. Permission checks happen on the server rather than in the app, so
-  data you are not party to is never sent to your phone in the first place.</p>
-
-  <h2>Children</h2>
-  <p>SplitFree is not directed at children under 13 and does not knowingly collect their data.</p>
-
-  <h2>Changes</h2>
-  <p>If this policy changes materially, the date above changes and the app will show a notice.</p>
-
-  <h2>Contact</h2>
-  <p>Questions, or a data request: <a href="mailto:justutsav.05@gmail.com">justutsav.05@gmail.com</a></p>
-
-  <footer>
-    SplitFree · Free forever, no ads, no tracking.
-  </footer>
+  <section class="story" id="story" aria-label="How SplitFree works" data-ground="dark">
+    <div class="story-pin">
+      <ol class="story-steps" aria-hidden="true">
+        <li class="is-on">Scan</li>
+        <li>Add</li>
+        <li>Remind</li>
+        <li>Settle</li>
+      </ol>
+      <div class="story-copy">
+        <article class="chapter is-on" data-ch="0">
+          <h2>Pay any shop with a scan</h2>
+          <p class="ch-line">Scan the shop's UPI QR and pay in your own UPI app. SplitFree keeps the payment so you can split it later.</p>
+          <img class="ch-shot" src="/assets/video/scan-poster.jpg" width="720" height="1600" alt="SplitFree's scanner reading a shop's UPI QR, then the amount being entered" loading="lazy" draggable="false">
+        </article>
+        <article class="chapter" data-ch="1">
+          <h2>Split it with one slide</h2>
+          <p class="ch-line">Pick a group or a few friends, untick whoever wasn't there, slide. Everyone's share comes out to the paisa.</p>
+          <img class="ch-shot" src="/assets/video/add-poster.jpg" width="720" height="1600" alt="SplitFree splitting a ₹340 shop payment between friends" loading="lazy" draggable="false">
+        </article>
+        <article class="chapter" data-ch="2">
+          <h2>Nudge them, skip the awkward call</h2>
+          <p class="ch-line">Tap Remind and their phone buzzes with exactly what they owe you. No chasing, no screenshots.</p>
+          <img class="ch-shot" src="/assets/video/remind-poster.jpg" width="720" height="1600" alt="SplitFree home screen: tapping Remind next to Luffy, who owes ₹940" loading="lazy" draggable="false">
+        </article>
+        <article class="chapter" data-ch="3">
+          <h2>Settle up, back to ₹0</h2>
+          <p class="ch-line">Slide to pay on UPI, say it went through, and the balance clears for both of you.</p>
+          <img class="ch-shot" src="/assets/video/settle-poster.jpg" width="720" height="1600" alt="SplitFree settling ₹620 with Singh on UPI" loading="lazy" draggable="false">
+        </article>
+      </div>
+    </div>
+  </section>
+  </div>
 </div>
+
+<section class="receipt-band" id="privacy" aria-labelledby="privacy-title" data-ground="dark">
+  <div class="zero" aria-hidden="true"><p class="zero-fig">₹0</p><p class="zero-cap">What SplitFree costs you, and what it earns from your data.</p></div>
+  <article class="receipt">
+    <h2 id="privacy-title" class="receipt-title">A receipt for your data</h2>
+    <p>SplitFree does one job: it keeps track of who owes whom, exactly, and makes paying back one slide. It does not need to know anything else about you, so it does not ask.</p>
+    <table class="receipt-items">
+      <caption class="sr-only">What SplitFree takes</caption>
+      <tbody>
+        <tr><th scope="row">Ads</th><td>None</td></tr>
+        <tr><th scope="row">Analytics or ad SDKs</th><td>None</td></tr>
+        <tr><th scope="row">Your data sold</th><td>Never</td></tr>
+        <tr><th scope="row">Passwords stored</th><td>None, sign-in is a code</td></tr>
+        <tr><th scope="row">Location, contacts, mic</th><td>Never asked for</td></tr>
+        <tr><th scope="row">Camera</th><td>Only to scan a QR</td></tr>
+        <tr><th scope="row">Delete your account</th><td>Anytime, in the app</td></tr>
+        <tr class="total"><th scope="row">Price</th><td>₹0, forever</td></tr>
+      </tbody>
+    </table>
+    <div class="tear">
+      <p>Every detail, in plain words, is in the policy.</p>
+      <a class="btn" href="/privacy">Read the privacy policy</a>
+    </div>
+  </article>
+</section>
+
+<section class="end" id="get" aria-labelledby="faq-title" data-ground="light">
+  <div class="faq">
+    <h2 id="faq-title" class="faq-title">Questions</h2>
+    <div class="faq-list">
+      <details name="faq" open><summary>Is SplitFree really free?</summary><p>Yes. No subscription, no premium tier, no ads, and no limit on expenses, groups or friends.</p></details>
+      <details name="faq"><summary>Does SplitFree touch my money?</summary><p>No. It keeps track of who owes whom. Paying happens in your own UPI app, from your bank to theirs. SplitFree never sees your bank account, balance or PIN.</p></details>
+      <details name="faq"><summary>Do my friends need the app?</summary><p>To see what they owe and pay you back in a tap, yes. You can add them by name first and invite them later with a link or a QR code.</p></details>
+      <details name="faq"><summary>What happens to odd amounts?</summary><p>Shares are worked out in paise, so they always add up to the bill. ₹100 split three ways is ₹33.34, ₹33.33 and ₹33.33.</p></details>
+      <details name="faq"><summary>Can it split rent or a shop bill?</summary><p>Yes. Set rent or an EMI once and it is added every month. Pay a shop by scanning its UPI QR, then split it or keep it as yours.</p></details>
+      <details name="faq"><summary>Who can see my expenses?</summary><p>Only the people in them. In a group you see the expenses you are part of, and the balances still count everything.</p></details>
+      <details name="faq"><summary>Is there an iPhone app?</summary><p>Not yet. SplitFree is on Android, through Google Play.</p></details>
+      <details name="faq"><summary>How do I delete my account?</summary><p>Account, then Settings, then Delete account, once your balances are settled. The <a href="/privacy#delete-account">privacy policy</a> lists exactly what is removed.</p></details>
+    </div>
+  </div>
+  <div class="get">
+    <h2 class="get-title">Get SplitFree</h2>
+    <p class="get-line">Got a bill on the table? Add it before anyone forgets.</p>
+    <a class="btn" href="https://play.google.com/store/apps/details?id=app.splitfree.client">Get it on Google Play</a>
+    <figure class="get-qr">
+      <img src="/assets/img/play-qr.svg" width="180" height="180" alt="QR code that opens SplitFree on Google Play" draggable="false">
+      <figcaption>On a computer? Scan this with your phone camera.</figcaption>
+    </figure>
+  </div>
+</section>
+</main>
+
+<footer class="foot" data-ground="dark">
+  <div class="foot-coins" aria-hidden="true"><img src="/assets/coins/stonks-face.svg" width="44" height="44" alt="" style="--n:0" loading="lazy" draggable="false"><img src="/assets/coins/paisa-vasool-face.svg" width="44" height="44" alt="" style="--n:1" loading="lazy" draggable="false"><img src="/assets/coins/kanjoos-face.svg" width="44" height="44" alt="" style="--n:2" loading="lazy" draggable="false"><img src="/assets/coins/treat-on-me-face.svg" width="44" height="44" alt="" style="--n:3" loading="lazy" draggable="false"><img src="/assets/coins/rich-uncle-face.svg" width="44" height="44" alt="" style="--n:4" loading="lazy" draggable="false"><img src="/assets/coins/settle-king-face.svg" width="44" height="44" alt="" style="--n:5" loading="lazy" draggable="false"><img src="/assets/coins/sus-face.svg" width="44" height="44" alt="" style="--n:6" loading="lazy" draggable="false"><img src="/assets/coins/still-waiting-face.svg" width="44" height="44" alt="" style="--n:7" loading="lazy" draggable="false"><img src="/assets/coins/paid-back-face.svg" width="44" height="44" alt="" style="--n:8" loading="lazy" draggable="false"></div>
+  <p class="foot-mark">splitfree</p>
+  <ul class="foot-links">
+    <li><a href="/privacy">Privacy policy</a></li>
+    <li><a href="/privacy#delete-account">Delete your account</a></li>
+    <li><a href="mailto:justutsav.05@gmail.com">justutsav.05@gmail.com</a></li>
+  </ul>
+  <p class="foot-legal">SplitFree is made in India by <a href="https://justutsav.com">Utsav</a>. Google Play is a trademark of Google LLC. This site sets no cookies and runs no analytics.</p>
+</footer>
+
+<script src="/assets/js/site.js" defer></script>
+<script type="module" src="/assets/js/stage.js"></script>
 </body>
 </html>

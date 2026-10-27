@@ -1,0 +1,146 @@
+[
+ {
+  "id": "stonks",
+  "label": "Stonks",
+  "bg": "#D8F3E3",
+  "face": "#FFCB45",
+  "rim": "#E3A019",
+  "ring": "#F2B632",
+  "ink": "#5A3A00"
+ },
+ {
+  "id": "broke",
+  "label": "Broke",
+  "bg": "#E4E9F0",
+  "face": "#E3E7EC",
+  "rim": "#A9B2BC",
+  "ring": "#CBD2DA",
+  "ink": "#2F3A45"
+ },
+ {
+  "id": "rich-uncle",
+  "label": "Rich uncle",
+  "bg": "#EDE4FA",
+  "face": "#FFCB45",
+  "rim": "#E3A019",
+  "ring": "#F2B632",
+  "ink": "#5A3A00"
+ },
+ {
+  "id": "paisa-vasool",
+  "label": "Paisa vasool",
+  "bg": "#FFF1C2",
+  "face": "#FFCB45",
+  "rim": "#E3A019",
+  "ring": "#F2B632",
+  "ink": "#5A3A00"
+ },
+ {
+  "id": "kal-pakka",
+  "label": "Kal pakka",
+  "bg": "#FFE3D3",
+  "face": "#FFCB45",
+  "rim": "#E3A019",
+  "ring": "#F2B632",
+  "ink": "#5A3A00"
+ },
+ {
+  "id": "ghoster",
+  "label": "Ghoster",
+  "bg": "#ECE6F7",
+  "face": "#E3E7EC",
+  "rim": "#A9B2BC",
+  "ring": "#CBD2DA",
+  "ink": "#2F3A45"
+ },
+ {
+  "id": "treat-on-me",
+  "label": "Treat on me",
+  "bg": "#FFE1EC",
+  "face": "#FFCB45",
+  "rim": "#E3A019",
+  "ring": "#F2B632",
+  "ink": "#5A3A00"
+ },
+ {
+  "id": "accountant",
+  "label": "Accountant",
+  "bg": "#DCEBFA",
+  "face": "#E3E7EC",
+  "rim": "#A9B2BC",
+  "ring": "#CBD2DA",
+  "ink": "#2F3A45"
+ },
+ {
+  "id": "paid-full-bill",
+  "label": "Paid full bill",
+  "bg": "#FFE0DC",
+  "face": "#FFCB45",
+  "rim": "#E3A019",
+  "ring": "#F2B632",
+  "ink": "#5A3A00"
+ },
+ {
+  "id": "settle-king",
+  "label": "Settle king",
+  "bg": "#E8E0FF",
+  "face": "#FFCB45",
+  "rim": "#E3A019",
+  "ring": "#F2B632",
+  "ink": "#5A3A00"
+ },
+ {
+  "id": "saw-the-bill",
+  "label": "Saw the bill",
+  "bg": "#E6E6E6",
+  "face": "#E3E7EC",
+  "rim": "#A9B2BC",
+  "ring": "#CBD2DA",
+  "ink": "#2F3A45"
+ },
+ {
+  "id": "paid-back",
+  "label": "Paid back",
+  "bg": "#FFE4EE",
+  "face": "#FFCB45",
+  "rim": "#E3A019",
+  "ring": "#F2B632",
+  "ink": "#5A3A00"
+ },
+ {
+  "id": "forgot-to-pay",
+  "label": "Forgot to pay",
+  "bg": "#DDE3F5",
+  "face": "#F0A868",
+  "rim": "#C0702F",
+  "ring": "#DE8E4C",
+  "ink": "#4E2507"
+ },
+ {
+  "id": "still-waiting",
+  "label": "Still waiting",
+  "bg": "#FFE2CC",
+  "face": "#F0A868",
+  "rim": "#C0702F",
+  "ring": "#DE8E4C",
+  "ink": "#4E2507"
+ },
+ {
+  "id": "sus",
+  "label": "Sus",
+  "bg": "#D9F2F0",
+  "face": "#FFCB45",
+  "rim": "#E3A019",
+  "ring": "#F2B632",
+  "ink": "#5A3A00"
+ },
+ {
+  "id": "kanjoos",
+  "label": "Kanjoos",
+  "bg": "#F3E6D8",
+  "face": "#F0A868",
+  "rim": "#C0702F",
+  "ring": "#DE8E4C",
+  "ink": "#4E2507"
+ }
+]

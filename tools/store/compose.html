@@ -1,0 +1,111 @@
+<!doctype html>
+<!--
+  Play listing frame: one real capture in a thin-bezel device, a caption above,
+  on the site's night plum. tools/store/build.mjs opens this at the exact pixel
+  size Play wants and screenshots it. Nothing here draws app UI: the screen is
+  the capture, untouched.
+    ?w=1080&h=1920&kind=phone|tablet&shot=<file url>&cap=<caption>&coins=a,b
+    ?feature=1&shot=<home capture>   (the 1024x500 feature graphic)
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Store frame</title>
+<link rel="stylesheet" href="../../assets/css/fonts.css">
+<style>
+  :root { --night: #1c0612; --ink: #f6efe3; --accent: #6f044d; --gold: #ffcb45; --bezel: #0b0306; }
+  html, body { margin: 0; background: var(--night); }
+  body { position: relative; overflow: hidden; color: var(--ink); font-family: "Anek Latin", sans-serif; }
+  .cap {
+    position: absolute; margin: 0; font-weight: 600; font-stretch: 90%; letter-spacing: -0.025em;
+    line-height: 0.98; text-wrap: balance;
+  }
+  .device { position: absolute; background: var(--bezel); box-shadow: 0 0 0 3px #5b3a4b, 0 40px 90px rgba(0, 0, 0, 0.55); }
+  .device img { position: absolute; display: block; object-fit: cover; object-position: top; }
+  .hole { position: absolute; border-radius: 50%; background: #000; box-shadow: 0 0 0 2px #1a0d13; }
+  .coin { position: absolute; display: block; }
+  .mark { position: absolute; margin: 0; font-weight: 700; font-stretch: 125%; letter-spacing: -0.045em; line-height: 0.8; }
+  .line { position: absolute; margin: 0; font-weight: 600; font-stretch: 92%; letter-spacing: -0.015em; color: var(--ink); }
+  .line b { color: var(--gold); font-weight: 600; }
+</style>
+</head>
+<body>
+<script>
+  const q = new URLSearchParams(location.search);
+  const W = +(q.get("w") || 1080), H = +(q.get("h") || 1920);
+  document.body.style.width = `${W}px`;
+  document.body.style.height = `${H}px`;
+  const el = (tag, cls, css = {}, parent = document.body) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    Object.assign(e.style, Object.fromEntries(Object.entries(css).map(([k, v]) => [k, typeof v === "number" ? `${v}px` : v])));
+    parent.appendChild(e);
+    return e;
+  };
+  const coin = (id, x, y, size, turn) => {
+    const c = el("img", "coin", { left: x, top: y, width: size, height: size, transform: `rotate(${turn}deg)` });
+    c.src = `../../assets/coins/${id}-face.svg`;
+    c.alt = "";
+  };
+  /** A device of outer width `dw`, screen aspect `ratio` (h / w), bezel `b`, outer radius `r`. */
+  const device = (x, y, dw, ratio, b, r, hole) => {
+    const sw = dw - 2 * b, sh = Math.round(sw * ratio);
+    const d = el("div", "device", { left: x, top: y, width: dw, height: sh + 2 * b, borderRadius: r });
+    const img = el("img", "", { left: b, top: b, width: sw, height: sh, borderRadius: r - b }, d);
+    img.src = q.get("shot");
+    // phone: punch-hole in the status strip; tablet: camera in the bezel
+    if (hole) el("div", "hole", { width: hole, height: hole, left: dw / 2 - hole / 2, top: hole > b ? b + hole * 0.5 : (b - hole) / 2 }, d);
+    return { d, h: sh + 2 * b, img };
+  };
+
+  if (q.get("feature")) {
+    // 1024 x 500: wordmark and line on the left, the phone on home to the right,
+    // running off the bottom edge, with three coin faces around it.
+    el("p", "mark", { left: 64, top: 128, fontSize: 118 }).textContent = "splitfree";
+    el("p", "line", { left: 68, top: 262, fontSize: 40 }).innerHTML = "Split bills.<br><b>Settle on UPI.</b>";
+    coin("stonks", 560, 300, 96, -14);
+    coin("treat-on-me", 905, 64, 84, 12);
+    coin("sus", 920, 330, 70, -8);
+    device(650, 40, 270, 20 / 9, 9, 34, 13);
+    document.fonts.ready.then(ready);
+  } else {
+    const kind = q.get("kind") || "phone";
+    const pad = Math.round(W * 0.074);
+    const cap = el("h1", "cap", { left: pad, right: pad, top: Math.round(H * 0.058), fontSize: Math.round(W * 0.085) });
+    cap.textContent = q.get("cap");
+    if (kind !== "phone") cap.style.right = `${pad + Math.round(W * 0.13) + 24}px`;
+    document.fonts.ready.then(() => {
+      // the device fills what the caption leaves, up to a share of the width
+      const gap = Math.round(H * 0.04), foot = Math.round(H * 0.035);
+      const room = H - (cap.offsetTop + cap.offsetHeight) - gap - foot;
+      const phone = kind === "phone";
+      // phone: 20:9 screen, thin bezel, small radius, punch-hole camera;
+      // tablet: portrait 10:16 screen (the sw600dp / sw720dp capture)
+      const [ratio, b, r, hole, share] = phone ? [20 / 9, 13, 46, 22, 0.64] : [16 / 10, 20, 40, 10, 0.88];
+      const dw = Math.round(Math.min(W * share, (room - 2 * b) / ratio + 2 * b));
+      const dev = device((W - dw) / 2, 0, dw, ratio, b, r, hole);
+      const top = H - dev.h - foot;
+      dev.d.style.top = `${top}px`;
+      const coins = (q.get("coins") || "").split(",").filter(Boolean);
+      // coins never cover the screen: the capture stays whole. A phone has room
+      // either side for two on its bezel; a tablet fills the width, so it gets
+      // one, at the end of the caption line.
+      const left = (W - dw) / 2;
+      if (phone) {
+        const cs = Math.min(Math.round(W * 0.17), left + b - 12);
+        if (coins[0]) coin(coins[0], left + b - cs, top + dev.h * 0.30, cs, -12);
+        if (coins[1]) coin(coins[1], left + dw - b, top + dev.h * 0.62, cs * 0.9, 10);
+      } else if (coins[0]) {
+        const cs = Math.round(W * 0.13);
+        coin(coins[0], W - pad - cs, cap.offsetTop + cap.offsetHeight / 2 - cs / 2, cs, 10);
+      }
+      ready();
+    });
+  }
+  // build.mjs waits on this before the shutter
+  function ready() {
+    Promise.all([...document.images].map((i) => i.decode().catch(() => {}))).then(() => { document.body.dataset.ready = "1"; });
+  }
+</script>
+</body>
+</html>
