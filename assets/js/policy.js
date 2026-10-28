@@ -19,4 +19,21 @@
   addEventListener("scroll", spy, { passive: true });
   spy();
   if (reduced) parts.forEach((el) => el.classList.add("in"));
+
+  // smooth wheel scrolling, as on the home page; the contents links glide too
+  const lenis = !reduced && window.Lenis ? new window.Lenis({ lerp: 0.11 }) : null;
+  if (!lenis) return;
+  const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
+  requestAnimationFrame(raf);
+  document.addEventListener("click", (e) => {
+    const hash = e.target.closest('a[href^="#"]')?.getAttribute("href");
+    const target = hash && hash.length > 1 ? document.querySelector(hash) : null;
+    if (!target) return;
+    e.preventDefault();
+    // offsetTop, not the box: a heading still rising in is drawn lower than it sits
+    let y = 0;
+    for (let n = target; n; n = n.offsetParent) y += n.offsetTop;
+    lenis.scrollTo(y - 24, { duration: 1.1 }); // 24: the headings' scroll-margin-top
+    history.pushState(null, "", hash);
+  });
 })();

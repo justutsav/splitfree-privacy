@@ -1,0 +1,39 @@
+# SplitFree
+
+> SplitFree is a free Android app, made in India, for splitting bills with friends and groups to the paisa, reminding people what they owe, splitting shop payments made by scanning a UPI QR, and settling up through your own UPI app. No ads, no subscription, no limits.
+
+Key facts:
+
+- Price: free (₹0). No subscription, no premium tier, no ads, and no limit on expenses, groups or friends.
+- Platform: Android, on Google Play (package `app.splitfree.client`). There is no iPhone app yet.
+- Currency and payments: Indian rupees and UPI. SplitFree never holds or moves money: paying happens in your own UPI app, from your bank to theirs. It never sees your bank account, balance or UPI PIN.
+- Sign-in: a one-time code sent to your email, or your Google account. No password is stored.
+- Splitting: shares are worked out in paise, so they always add up to the bill (₹100 split three ways is ₹33.34, ₹33.33 and ₹33.33). Pick a group or a few friends, untick whoever was not there, and slide to add.
+- Shop payments: scan a shop's UPI QR, pay in your UPI app, then split the payment with friends or keep it as yours.
+- Reminders: one tap on Remind sends the other person a notification with exactly what they owe.
+- Settling up: slide to pay on UPI, confirm it went through, and the balance clears for both people.
+- Recurring costs: set rent or an EMI once and it is added every month.
+- Privacy: only the people in an expense can see it. No analytics or advertising SDKs, no data sold, and location, contacts and microphone are never asked for; the camera is used only to scan a QR. Crash reports go to Sentry and are deleted after 90 days.
+- Deleting an account: in the app, Account, then Settings, then Delete account, once balances are settled.
+
+## Pages
+
+- [SplitFree home](https://splitfree.justutsav.com/): what the app does in four steps (scan, add, remind, settle), and common questions
+- [Privacy policy](https://splitfree.justutsav.com/privacy): what is collected, why, who can see it, where it is stored, how long it is kept, and your rights
+- [Delete your account](https://splitfree.justutsav.com/privacy#delete-account): what deletion removes and how to ask for it by email
+- [SplitFree on Google Play](https://play.google.com/store/apps/details?id=app.splitfree.client): the download
+
+## Questions
+
+- Is SplitFree really free? Yes. No subscription, no premium tier, no ads, and no limit on expenses, groups or friends.
+- Does SplitFree touch my money? No. It keeps track of who owes whom. Paying happens in your own UPI app, from your bank to theirs. SplitFree never sees your bank account, balance or PIN.
+- Do my friends need the app? To see what they owe and pay you back in a tap, yes. You can add them by name first and invite them later with a link or a QR code.
+- What happens to odd amounts? Shares are worked out in paise, so they always add up to the bill. ₹100 split three ways is ₹33.34, ₹33.33 and ₹33.33.
+- Can it split rent or a shop bill? Yes. Set rent or an EMI once and it is added every month. Pay a shop by scanning its UPI QR, then split it or keep it as yours.
+- Who can see my expenses? Only the people in them. In a group you see the expenses you are part of, and the balances still count everything.
+- Is there an iPhone app? Not yet. SplitFree is on Android, through Google Play.
+- How do I delete my account? Account, then Settings, then Delete account, once your balances are settled. The privacy policy lists exactly what is removed.
+
+## Optional
+
+- Maker: [Utsav](https://justutsav.com). Contact: justutsav.05@gmail.com

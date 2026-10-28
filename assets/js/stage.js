@@ -202,38 +202,73 @@ async function start() {
   screenMat.uniforms.b.value = home;
 
   // ------------------------------------------------------- the four clips
+  // Which file (tools/video-variants.sh): VP9 where the browser plays it, H.264
+  // where not; the 540-wide cut on a phone, whose 3D phone is ~240 css px wide.
+  const vp9 = document.createElement("video").canPlayType('video/webm; codecs="vp9"') !== "";
+  const cut = wideQuery.matches ? "" : "-540";
   const CLIPS = ["scan", "add", "remind", "settle"].map((name, i) => {
     const v = Object.assign(document.createElement("video"), { muted: true, playsInline: true, preload: "none", crossOrigin: "anonymous" });
     v.setAttribute("muted", "");
-    v.src = `/assets/video/${name}.mp4`;
-    const clip = { name, i, v, tex: null, poster: null, failed: false };
-    v.addEventListener("error", () => { clip.failed = true; });
-    // Hold the last frame, tell site.js (it may move on to the next chapter
-    // after 2 s), and if it didn't, play again.
+    v.src = `/assets/video/${name}${cut}.${vp9 ? "webm" : "mp4"}`;
+    const clip = { name, i, v, tex: null, poster: null, first: null, failed: false };
+    // a browser that says it plays VP9 and then can't gets the H.264 file
+    v.addEventListener("error", () => {
+      if (!v.src.endsWith(".webm")) { clip.failed = true; return; }
+      v.src = `/assets/video/${name}${cut}.mp4`;
+      if (current === clip) v.play().catch(() => {});
+    });
+    // Each file is cut right after its last animation. Hold the last frame for
+    // a second, tell site.js (it may move on to the next chapter), and if it
+    // didn't, play again.
     v.addEventListener("ended", () => {
       if (current !== clip) return;
+      const endedAt = performance.now();
       emit("sf:clipend", { ch: i });
-      setTimeout(() => { if (current === clip && v.paused) { v.currentTime = 0; v.play().catch(() => {}); } }, 2600);
+      setTimeout(() => {
+        const adv = window.sfState?.["sf:advance"];
+        if (adv?.ch === i && adv.at >= endedAt) return; // site.js is moving on
+        if (current === clip && v.paused) { v.currentTime = 0; v.play().catch(() => {}); }
+      }, 1000);
     });
     return clip;
   });
   let current = null;
+  const videoTex = (clip) => (clip.tex ??= Object.assign(new THREE.VideoTexture(clip.v), { colorSpace: THREE.SRGBColorSpace }));
+  // The clip's first frame, a 20 KB still: on screen until the clip has a frame
+  // of its own, instead of an empty screen while it downloads.
+  const firstStill = (clip) => (clip.first ??= tex(`/assets/video/${clip.name}-first.webp`).catch(() => home));
   async function screenFor(ch) {
     const clip = CLIPS[ch];
     if (!clip) return home;
     if (!clip.failed && !reduced) {
-      clip.tex ??= Object.assign(new THREE.VideoTexture(clip.v), { colorSpace: THREE.SRGBColorSpace });
-      return clip.tex;
+      if (clip.v.readyState >= 2) return videoTex(clip);
+      clip.v.addEventListener("playing", () => { if (current === clip) showTex(videoTex(clip)); }, { once: true });
+      return firstStill(clip);
     }
     clip.poster ??= tex(`/assets/video/${clip.name}-poster.jpg`).catch(() => home);
     return clip.poster;
   }
-  // How far into the chapter's clip we are, 0..1; 1 when there is no clip to
-  // follow (reduced motion, or it failed), so the props show their end state.
-  const progress = () => {
-    const v = current?.v;
-    if (!v || current.failed || reduced || !v.duration) return reduced || current?.failed ? 1 : 0;
-    return v.currentTime / v.duration;
+  // put a texture on the screen now, mid-crossfade or not
+  const showTex = (t) => {
+    screenMat.uniforms.b.value = t;
+    if (!screenAnim) screenMat.uniforms.a.value = t;
+    wake();
+  };
+  // Once the page is up: the first chapter's clip starts downloading, and every
+  // first frame, so the story opens on a picture however slow the network.
+  const opened = () => {
+    if (reduced) return;
+    // preload alone starts the download; load() would reset a clip already playing
+    const go = () => { CLIPS[0].v.preload = "auto"; CLIPS.forEach(firstStill); };
+    (window.requestIdleCallback ?? setTimeout)(go, { timeout: 1500 });
+  };
+  if (window.sfState?.["sf:opened"]) opened(); // the opening can finish before this module does
+  else document.addEventListener("sf:opened", opened, { once: true });
+  // Seconds into the chapter's clip; Infinity when there is no clip to follow
+  // (reduced motion, or it failed), so the props show their end state.
+  const clipTime = () => {
+    if (reduced || current?.failed) return Infinity;
+    return current?.v.currentTime ?? 0;
   };
   let screenAnim = null;
   async function showChapter(ch) {
@@ -246,7 +281,7 @@ async function start() {
       const next = CLIPS[ch + 1];
       if (next) {
         next.v.preload = "auto";
-        next.tex ??= Object.assign(new THREE.VideoTexture(next.v), { colorSpace: THREE.SRGBColorSpace });
+        videoTex(next);
       }
     }
     const t = await screenFor(ch);
@@ -360,6 +395,7 @@ async function start() {
   // scan: the QR on a little acrylic stand. Scanning it with a real phone is,
   // as the sign says, at your own risk.
   const standee = new THREE.Group();
+  const QR_Y = 0.633 - (352 / 720) * 1.266; // QR spans y 172..532 of the 720px card
   {
     const c = document.createElement("canvas");
     c.width = 512; c.height = 720;
@@ -380,9 +416,11 @@ async function start() {
     acrylic.position.set(0, 0.72, -0.02); acrylic.rotation.x = tilt;
     const base = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.08, 0.34), new THREE.MeshPhysicalMaterial({ color: 0x2b1621, roughness: 0.4, clearcoat: 0.6 }));
     base.position.y = 0.04;
-    const beam = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.02), new THREE.MeshBasicMaterial({ color: 0xff5fae, transparent: true, opacity: 0.85 }));
-    beam.position.set(0, 0.72, 0.012); beam.rotation.x = tilt;
-    standee.add(acrylic, card, base, beam);
+    // on the card itself, so it leans with it; QR_Y is the QR's centre on the card
+    const beam = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.02), new THREE.MeshBasicMaterial({ color: 0xff5fae, transparent: true, opacity: 0.85 }));
+    beam.position.set(0, QR_Y, 0.004);
+    card.add(beam);
+    standee.add(acrylic, card, base);
     standee.userData = { beam, s: 0 };
     rig.add(standee);
   }
@@ -469,7 +507,7 @@ async function start() {
   canvas.addEventListener("pointerdown", (e) => {
     toNdc(e, ndc);
     const hit = pick();
-    if (hit) { hit.userData.spinT += Math.PI * 2; wake(); return; }
+    if (hit) { hit.userData.spinT += Math.PI * 2; window.sfCoinSound?.(); wake(); return; }
     if (e.pointerType === "mouse") e.preventDefault(); // no text selection while turning the phone
     drag = { x: e.clientX, base: dragY };
     canvas.setPointerCapture(e.pointerId);
@@ -547,20 +585,23 @@ async function start() {
     chT += Math.min(0.25, raw); // real time, so a slow device's props still arrive on cue
     const wide = wideQuery.matches;
     const h = smooth(st.hero / 0.85); // 0 hero -> 1 story
-    const p = progress();
+    const p = clipTime();
 
     // where the phone sits, worked out in screen fractions then turned into
     // world units, so it fits any window
     const short = wide && H < 500; // a phone on its side
     // short phones: a smaller phone, so it never reaches the hero line
-    const heroFit = wide ? (short ? 0.5 : 0.62) : Math.min(0.48, (0.48 * H) / 800);
-    const storyFit = wide ? 0.8 : Math.min(0.56, (0.62 * visW) / (visH * PW / PH));
+    const heroFit = wide ? (short ? 0.5 : 0.62) : Math.min(0.53, (0.53 * H) / 800);
+    const storyFit = wide ? 0.8 : Math.min(0.62, (0.68 * visW) / (visH * PW / PH));
     const fit = lerp(heroFit, storyFit, h);
     const s = (fit * visH) / PH;
     // on a phone the remind chapter makes room for the second phone
     const fxT = wide ? lerp(0.5, ch === REMIND ? 0.74 : 0.69, h) : ch === REMIND ? 0.66 : 0.5;
     fxNow += (fxT - fxNow) * (h < 0.99 ? 1 : k(4, dt));
-    const fy = wide ? lerp(short ? 0.38 : 0.44, 0.5, h) : lerp(0.52, 0.37, h);
+    // on a phone the story's words start at copyTop (site.css: min(75svh, 100svh - 170px))
+    // and the phone ends just above them
+    const copyTop = Math.min(0.75, 1 - 170 / H);
+    const fy = wide ? lerp(short ? 0.38 : 0.44, 0.5, h) : lerp(0.51, copyTop - 0.02 - storyFit / 2, h);
     rig.position.set((fxNow - 0.5) * visW, (0.5 - fy) * visH, 0);
     rig.scale.setScalar(s);
     const px = (H / visH) * s; // css px per rig unit
@@ -624,11 +665,11 @@ async function start() {
       u.s += (on(SCAN) - u.s) * k(5, dt);
       standee.visible = u.s > 0.01;
       // on a phone it stands in front, low on the left, so the phone never hides it
-      standee.scale.setScalar(Math.max(0.0001, u.s) * (wide ? 0.95 : 0.62));
+      standee.scale.setScalar(Math.max(0.0001, u.s) * (wide ? 0.95 : 0.58));
       if (wide) standee.position.set(-0.95, -1.15 + (1 - u.s) * -0.5, -0.9);
-      else standee.position.set(-0.56, -1.12 + (1 - u.s) * -0.4, 0.5);
+      else standee.position.set(-0.47, -1.12 + (1 - u.s) * -0.4, 0.5);
       standee.rotation.y = wide ? 0.38 : 0.3;
-      u.beam.position.y = 0.72 + (reduced ? 0 : Math.sin(t * 2.4) * 0.42);
+      u.beam.position.y = QR_Y + (reduced ? 0 : Math.sin(t * 2.4) * 0.29); // stays inside the QR
       u.beam.visible = !reduced;
     }
 
@@ -640,7 +681,7 @@ async function start() {
     splitCoins.forEach((c, i) => {
       const u = c.userData;
       // they come out as the clip reaches "₹85 each", and go back in when it loops
-      const go = on(ADD) * (p > 0.58 + i * 0.02 ? 1 : 0);
+      const go = on(ADD) * (p > 6.7 + i * 0.23 ? 1 : 0);
       u.s += (go - u.s) * k(go ? 7 : 9, dt);
       const [x, y, z] = SP[i];
       const wave = reduced ? 0 : Math.sin(t * 1.6 - i * 1.1);
@@ -659,13 +700,13 @@ async function start() {
       const fu = friend.userData;
       fu.s += (on(REMIND) - fu.s) * k(5, dt);
       friend.visible = fu.s > 0.01;
-      const LAUNCH = 0.15, LAND = 0.3;
+      const LAUNCH = 2.95, LAND = 3.75; // seconds into the clip: the tap on Remind, then 0.8 s of flight
       const landed = on(REMIND) && p >= LAND;
       const fs = wide ? 0.82 : 0.66;
       friend.scale.setScalar(Math.max(0.0001, fu.s) * fs);
       if (wide) friend.position.set(-1.0, 0.12 + (1 - fu.s) * -0.6, -1.2);
-      else friend.position.set(-0.84, 0.3 + (1 - fu.s) * -0.6, -0.8);
-      const buzz = landed && p < LAND + 0.08 && !reduced ? Math.sin(t * 90) * 0.035 : 0;
+      else friend.position.set(-0.78, 0.3 + (1 - fu.s) * -0.6, -0.8);
+      const buzz = landed && p < LAND + 0.42 && !reduced ? Math.sin(t * 90) * 0.035 : 0;
       friend.rotation.set(0.04, wide ? 0.34 : 0.28, -0.03 + buzz);
       friendMat.uniforms.glow.value += ((landed ? 1 : 0.22) - friendMat.uniforms.glow.value) * k(8, dt);
       friendMat.uniforms.mixv.value += ((landed ? 1 : 0) - friendMat.uniforms.mixv.value) * k(7, dt);
@@ -675,7 +716,7 @@ async function start() {
       const nu = nudge.userData;
       nu.s += ((f > 0 && f < 1 ? 1 : 0) - nu.s) * k(14, dt);
       nudge.visible = nu.s > 0.01;
-      v3.set(0.3, -0.2, 0.3);
+      v3.set(0.3, 0, 0.3); // Luffy's Remind, mid-screen once the tip has scrolled it into view
       friend.localToWorld(v3b.set(0, 0.55, 0.2));
       rig.worldToLocal(v3b);
       const along = (e, out) => out.set(lerp(v3.x, v3b.x, e), lerp(v3.y, v3b.y, e) + Math.sin(e * Math.PI) * 0.7, lerp(v3.z, v3b.z, e) + Math.sin(e * Math.PI) * 0.6);
@@ -700,12 +741,13 @@ async function start() {
     // settle: the coins stack up beside the phone, Singh's "paid back" coin on top
     {
       const go = on(SETTLE);
-      stack.position.set(wide ? 0.72 : 0.56, -0.95, 0.55);
+      // on a phone, higher: its tag must clear the chapter's words under the phone
+      stack.position.set(wide ? 0.72 : 0.52, wide ? -0.95 : -0.62, 0.55);
       stack.rotation.set(0.32, -0.3, 0);
       stack.scale.setScalar(wide ? 0.85 : 0.7);
-      const START = 0.52; // the clip's "Yes, it's paid" is at about 5.3 of 10.3 s
+      const START = 7.45; // the clip's "Yes, it's paid", in seconds (record-clips.mjs logs it)
       for (const c of stackCoins) {
-        const shown = go && p > START + c.userData.k * 0.018;
+        const shown = go && p > START + c.userData.k * 0.19;
         const y = shown ? c.userData.y : c.userData.y + 2.2;
         c.position.y += (y - c.position.y) * k(shown ? 7 : 14, dt);
         c.position.x = Math.sin(c.userData.k * 2.1) * 0.012;
@@ -714,7 +756,7 @@ async function start() {
       }
       const pu = paid.userData;
       const top = stackCoins.length * CT * 1.05 + 0.24;
-      pu.s += ((go && p > START + 0.2 ? 1 : 0) - pu.s) * k(5, dt);
+      pu.s += ((go && p > START + 2.06 ? 1 : 0) - pu.s) * k(5, dt);
       paid.position.set(0, top + (1 - pu.s) * 0.6 + (reduced ? 0 : Math.sin(t * 1.5) * 0.035), 0.05);
       paid.scale.setScalar(Math.max(0.0001, pu.s));
       pu.spin += (pu.spinT - pu.spin) * k(4.5, dt);

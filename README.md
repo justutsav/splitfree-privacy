@@ -32,17 +32,27 @@ the other and both "Last updated" dates, and keep Play's Data safety form matchi
 ## How the page is built
 
 - Type: Anek Latin (display, figures, interface) and Literata (reading), both self-hosted from
-  `assets/fonts`, so the site makes no request to any other company.
+  `assets/fonts`, so the site makes no request to any other company. They are cut down to the
+  characters the pages use by `tools/fonts.sh` (the rupee sign gets its own tiny file); a new
+  non-ASCII character in the copy needs adding there and in `assets/css/fonts.css`.
+- Scrolling is smoothed by Lenis (`assets/vendor/lenis.min.js`, MIT, wheel and trackpad only).
+  The chime a coin makes when clicked is `assets/js/coin-sound.js`, made in the browser.
 - The fixed half is one three.js scene (`assets/js/stage.js`, `assets/vendor/three.module.min.js`
   r169): the phone shows real app screens, the coins are the app's own avatar faces exported
   from `src/lib/avatar-presets.ts`. Everything it shows also exists in HTML, so the page works
   without WebGL. `assets/js/site.js` owns every control.
 - `assets/shots/*.webp` and `assets/video/*.mp4` are captured from the real app running against
-  the local stack, never production data. The story's screens and clips use a made-up cast
+  the local stack, never production data. The site plays the VP9 `.webm` where the browser can and
+  a 540-wide cut on phones (`tools/video-variants.sh`), showing each clip's first frame until it
+  can play; the 3D props are timed in seconds of the clip, which `record-clips.mjs` logs. The story's screens and clips use a made-up cast
   (`tools/seed-site.mjs`: Kabir with the MindOS owl, Singh, Luffy, Elon, Oggy); the privacy
   page's screens come from the app's own demo seed (`scripts/seed-demo.mjs`).
 - The Content-Security-Policy in `vercel.json` allows only this origin (plus the Supabase API for
   the reset page). Adding anything from a CDN means editing it.
+- For search engines and AI assistants: JSON-LD (the app and the FAQ) in `index.html`, a
+  breadcrumb on the policy, `robots.txt` naming the AI crawlers as allowed, and `llms.txt`, a
+  plain-text summary. When a fact on the page changes (price, platforms, FAQ answers), change
+  it in `llms.txt` and the JSON-LD too.
 
 ## Refreshing the pictures
 
@@ -58,7 +68,8 @@ node scripts/seed-demo.mjs
 node ../../splitfree-privacy/tools/capture-screens.mjs /tmp/shots plum      # privacy-page screens
 ```
 
-`record-clips.mjs` reseeds before each clip, writes `assets/video/<clip>.mp4` and its poster, and
+`record-clips.mjs` reseeds before each clip, writes `assets/video/<clip>.mp4` and its poster (then
+runs `tools/video-variants.sh` for the files the site serves), and
 `assets/shots/home.webp` / `settled.webp`. Pass clip names to redo only some. The scan clip's
 camera is a drawn shop standee fed to Chrome as a fake webcam. `tools/flow.mjs` runs ad-hoc steps
 against the app and screenshots each one, for finding the next thing to tap.

@@ -2,12 +2,13 @@
 //   cd ../SplitFree/splitfreeapp            (node 22; vite dev on :5299, see app-lib.mjs)
 //   node ../../splitfree-privacy/tools/record-clips.mjs [home add remind scan settle]
 // Each clip reseeds first (tools/seed-site.mjs), records a 2x screencast and
-// encodes assets/video/<name>.mp4 + <name>-poster.jpg. home also writes
+// encodes assets/video/<name>.mp4 + <name>-poster.jpg, then the VP9, 540-wide
+// and first-frame files the site serves (tools/video-variants.sh). home also writes
 // assets/shots/home.webp; settle writes assets/shots/settled.webp.
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { launch, appPage, mintSession, sleep, tap, slide, fakePush, seedPendingShop, SHOP_QR, BASE, APP } from "./app-lib.mjs";
+import { launch, appPage, mintSession, sleep, tap, slide, fakePush, seedPendingShop, SHOP_QR, PLAY_URL, BASE, APP } from "./app-lib.mjs";
 
 const SITE = resolve(import.meta.dirname, "..");
 const VIDEO = `${SITE}/assets/video`, SHOTS = `${SITE}/assets/shots`;
@@ -27,6 +28,41 @@ async function tourTo(page, text) {
     await sleep(500);
   }
   throw new Error(`tour never reached "${text}"`);
+}
+
+/**
+ * Home's tour, cut down to one tip on `target` (a data-coach id). The app has no
+ * tip for Remind or Paid all; this borrows its own CoachMarks so the clip shows
+ * where the tap lands the way the scan and add clips do. Rewrites the steps of
+ * the "home-v2" CoachMarks in home.tsx as vite serves it.
+ */
+const oneTip = (target, text) => ({
+  "/_authenticated/home.tsx": (src) => {
+    const at = src.indexOf('"home-v2"');
+    const from = at < 0 ? -1 : src.indexOf("steps: [", at);
+    if (from < 0) return src; // the route's other chunk
+    let i = from + "steps: ".length, depth = 0;
+    for (; i < src.length; i++) {
+      if (src[i] === "[") depth++;
+      else if (src[i] === "]" && --depth === 0) break;
+    }
+    return `${src.slice(0, from)}steps: [${JSON.stringify({ target, text })}]${src.slice(i + 1)}`;
+  },
+});
+/** Mark the first button reading exactly `label` as CoachMarks target `id`, as soon as it renders. */
+const coachOn = (label, id) => (p) => p.evaluateOnNewDocument((label, id) => {
+  new MutationObserver(() => {
+    if (document.querySelector(`[data-coach="${id}"]`)) return;
+    [...document.querySelectorAll("button")].find((b) => b.textContent.trim() === label)?.setAttribute("data-coach", id);
+  }).observe(document, { childList: true, subtree: true });
+}, label, id);
+/** Wait for the tour card to show `text` (a target that renders late makes CoachMarks skip it). */
+async function waitTip(page, text, ms = 8000) {
+  for (let t = 0; t < ms; t += 100) {
+    if ((await page.evaluate(() => document.querySelector('[aria-label="Next tip"]')?.innerText ?? "")).includes(text)) return;
+    await sleep(100);
+  }
+  throw new Error(`the tip "${text}" never showed`);
 }
 
 /** Wait until the page's text contains `text`, or fail the run (a silent miss ships a wrong clip). */
@@ -50,9 +86,9 @@ async function tick(page, name) {
  * Open `path` signed in, at 2x, and hand back a recorder whose mark() notes
  * seconds since the screencast started, so the encode can trim dead time.
  */
-async function session(browser, auth, path, { before, tour } = {}) {
+async function session(browser, auth, path, { before, tour, patches } = {}) {
   const page = await appPage(browser, auth, { zoom: true, tour });
-  await fakePush(page);
+  await fakePush(page, patches);
   // A soft fingertip, so a viewer can see what was tapped and dragged.
   await page.evaluateOnNewDocument(() => {
     addEventListener("DOMContentLoaded", () => {
@@ -161,8 +197,13 @@ function withoutFlat(webm, segments, windows) {
 /**
  * Encode [from, to] second ranges of the screencast, joined by 0.3 s
  * crossfades (a jump past a wait the app makes, e.g. settle's 5 s hold).
+ * The file then ends right after its last moving frame, but never before
+ * `minEnd` seconds, or minEnd(clip seconds of marks), for props the site
+ * draws over a still screen; the site
+ * holds the last frame itself before it replays. Logs where each of `marks`
+ * lands in the clip: the site's 3D props are keyed to those seconds.
  */
-function encode(name, webm, segments, handoffs = []) {
+function encode(name, webm, segments, handoffs = [], { marks = {}, minEnd = 0 } = {}) {
   segments = withoutFlat(webm, segments, handoffs);
   console.log("  segments", JSON.stringify(segments.map((r) => r.map((v) => +v.toFixed(2)))));
   const out = `${VIDEO}/${name}.mp4`;
@@ -171,17 +212,36 @@ function encode(name, webm, segments, handoffs = []) {
   // constant-rate before cutting, and hold the last frame (it ends on a still).
   const n = segments.length;
   const parts = [`[0:v]fps=30,scale=720:1600:flags=lanczos,format=yuv420p,split=${n}${segments.map((_, i) => `[p${i}]`).join("")}`];
-  segments.forEach(([a, b], i) => parts.push(`[p${i}]trim=${a.toFixed(3)}:${b.toFixed(3)},setpts=PTS-STARTPTS${i === n - 1 ? ",tpad=stop_mode=clone:stop_duration=1" : ""}[s${i}]`));
+  segments.forEach(([a, b], i) => parts.push(`[p${i}]trim=${a.toFixed(3)}:${b.toFixed(3)},setpts=PTS-STARTPTS[s${i}]`));
   let last = "s0", len = segments[0][1] - segments[0][0];
   for (let i = 1; i < segments.length; i++) {
     parts.push(`[${last}][s${i}]xfade=transition=fade:duration=${X}:offset=${(len - X).toFixed(3)}[x${i}]`);
     last = `x${i}`;
     len += segments[i][1] - segments[i][0] - X;
   }
-  len += 1; // the tpad hold
   ff("-i", webm, "-filter_complex", parts.join(";"), "-map", `[${last}]`,
     "-c:v", "libx264", "-preset", "slow", "-crf", "27", "-pix_fmt", "yuv420p", "-g", "30", "-movflags", "+faststart", "-an", out);
-  console.log("  ->", out, len.toFixed(2) + "s");
+  // where a screencast second lands in the clip, past the cuts and crossfades
+  const clipAt = (t) => {
+    let start = 0;
+    for (const [a, b] of segments) {
+      if (t <= b) return start + Math.max(0, t - a);
+      start += b - a - X;
+    }
+    return null;
+  };
+  const at = Object.fromEntries(Object.entries(marks).map(([k, t]) => [k, +(clipAt(t) ?? NaN).toFixed(2)]));
+  // cut the still tail: everything after the last frame that changes
+  const { stderr } = spawnSync("ffmpeg", ["-hide_banner", "-i", out, "-vf", "freezedetect=n=0.002:d=0.4", "-map", "0:v", "-f", "null", "-"], { encoding: "utf8" });
+  const det = stderr.match(/freeze_(start|end): [\d.]+/g) ?? [];
+  const lastStill = det.at(-1)?.startsWith("freeze_start") ? +det.at(-1).split(": ")[1] : null;
+  const floor = typeof minEnd === "function" ? minEnd(at) : minEnd;
+  const cut = lastStill === null ? len : Math.min(len, Math.max(lastStill + 0.15, floor));
+  if (cut < len - 0.05) {
+    ff("-i", out, "-t", cut.toFixed(3), "-c", "copy", "-movflags", "+faststart", `${TMP}/${name}-cut.mp4`);
+    execFileSync("mv", [`${TMP}/${name}-cut.mp4`, out]);
+  }
+  console.log("  ->", out, `${len.toFixed(2)}s, cut to ${cut.toFixed(2)}s`, "clip seconds:", JSON.stringify(at));
 }
 
 // ------------------------------------------------------------------ clips
@@ -239,35 +299,51 @@ async function add(browser, auth) {
   await page.close();
 }
 
+const REMIND_TIP = "Remind. One tap sends them a nudge with exactly what they owe you — no awkward messages.";
 async function remind(browser, auth) {
-  const page = await session(browser, auth, "/home");
+  const page = await session(browser, auth, "/home", {
+    tour: "home-v2", patches: oneTip("remind", REMIND_TIP), before: coachOn("Remind", "remind"),
+  });
+  await waitTip(page, "Remind.");
+  await sleep(400);
   const { webm, marks } = await record(page, "remind", async (mark) => {
     await sleep(300);
     mark("start");
-    await sleep(900);
-    const btn = await page.evaluateHandle(() => {
-      const rows = [...document.querySelectorAll("button")].filter((b) => b.textContent.trim() === "Remind");
-      return rows[0];
-    });
-    await btn.asElement().click();
+    await sleep(2200);
+    await tap(page, "Skip tour");
+    await sleep(600);
+    const btn = await page.$('button[data-coach="remind"]');
+    if (!btn) throw new Error("no Remind button");
+    await btn.click();
     mark("tap");
     await sleep(1300);
     await poster(page, "remind");
-    await sleep(1900);
+    await sleep(1500);
     mark("end");
   });
-  encode("remind", webm, [[marks.start, marks.end]]);
+  // the screen goes still soon after the tap; the site's nudge flies for 1.6 s
+  // after it and Luffy's lock screen needs a moment to be read
+  const tapAt = marks.tap - marks.start;
+  encode("remind", webm, [[marks.start, marks.end]], [], { marks, minEnd: tapAt + 2.4 });
   await page.close();
 }
 
+const SETTLE_TIP = "Paid all. Settle everything you owe them in one go, with any UPI app.";
 async function settle(browser, auth) {
-  const page = await session(browser, auth, "/home");
+  const page = await session(browser, auth, "/home", {
+    tour: "home-v2", patches: oneTip("paid-all", SETTLE_TIP), before: coachOn("Paid all", "paid-all"),
+  });
+  await waitTip(page, "Paid all.");
+  await sleep(400);
   // Every state is held about 1.3 s, so a viewer can read it.
   const { webm, marks } = await record(page, "settle", async (mark) => {
     await sleep(300);
     mark("start");
-    await sleep(1300);
+    await sleep(2200);
+    await tap(page, "Skip tour");
+    await sleep(600);
     await tap(page, "Paid all");
+    mark("tap");
     await page.waitForSelector('[aria-label^="Slide to Pay"]', { timeout: 8000 });
     await sleep(1800);
     mark("slide");
@@ -289,7 +365,8 @@ async function settle(browser, auth) {
     await sleep(7200); // settle.tsx holds the thank-you 5.3 s before going home
     mark("end");
   });
-  encode("settle", webm, [[marks.start, marks.paid + 2.0], [marks.paid + 5.5, marks.end]], [[marks.slide, marks.sheet + 0.5]]);
+  // the site's "paid back" coin lands on the stack 2 s after "Yes, it's paid"; let it be seen
+  encode("settle", webm, [[marks.start, marks.paid + 2.0], [marks.paid + 5.5, marks.end]], [[marks.slide, marks.sheet + 0.5]], { marks, minEnd: (at) => at.paid + 3.1 });
   await page.close();
   // the clip ends on home without Singh; keep a still of it too
   const still = await appPage(browser, auth);
@@ -302,10 +379,12 @@ async function settle(browser, auth) {
 
 // The shop's QR standee, as a phone camera would see it: drawn in HTML, shot,
 // then drifted and zoomed by ffmpeg into the y4m Chrome plays as its camera.
+// Its QR is the app's Play link, so the code a visitor sees on the site works;
+// decodeAs() hands the app the shop's UPI code in its place.
 const CAMERA = `${TMP}/camera.y4m`;
 async function makeCamera() {
   const { default: QRCode } = await import(`${APP}/node_modules/qrcode/lib/index.js`);
-  const qr = await QRCode.toString(SHOP_QR, { type: "svg", margin: 1, errorCorrectionLevel: "M" });
+  const qr = await QRCode.toString(PLAY_URL, { type: "svg", margin: 1, errorCorrectionLevel: "M" });
   const shelves = Array.from({ length: 36 }, (_, i) => {
     const hue = [12, 42, 120, 200, 330, 28, 0, 54][i % 8];
     return `<i style="left:${(i % 9) * 11.5 - 2}%;top:${Math.floor(i / 9) * 16 + 2}%;width:${7 + (i * 7) % 5}%;height:${10 + (i * 3) % 4}%;background:hsl(${hue} 55% ${45 + (i * 5) % 20}%)"></i>`;
@@ -343,8 +422,40 @@ const hideToasts = (p) => p.evaluateOnNewDocument(() => addEventListener("DOMCon
   document.head.appendChild(s);
 }));
 
+/**
+ * The app prefers the platform BarcodeDetector (lib/qr-scan.ts). Stand one in
+ * that really decodes the camera frame with jsQR, but reads the Play link as
+ * the shop's UPI code, and only once it has been in view for `hold` ms, so
+ * the clip shows the whole QR for a moment before the pay sheet opens.
+ */
+const decodeAs = async (p, from, to, hold = 900) => {
+  await p.evaluateOnNewDocument(readFileSync(`${APP}/node_modules/jsqr/dist/jsQR.js`, "utf8"));
+  await p.evaluateOnNewDocument((from, to, hold) => {
+    const jsQR = window.jsQR;
+    window.BarcodeDetector = class {
+      constructor() { this.c = document.createElement("canvas"); this.g = this.c.getContext("2d", { willReadFrequently: true }); this.seen = 0; }
+      static async getSupportedFormats() { return ["qr_code"]; }
+      async detect(src) {
+        const w = src.videoWidth || src.width, h = src.videoHeight || src.height;
+        if (!w || !h) return [];
+        const k = Math.min(1, 960 / Math.max(w, h));
+        this.c.width = Math.round(w * k); this.c.height = Math.round(h * k);
+        this.g.drawImage(src, 0, 0, this.c.width, this.c.height);
+        const hit = jsQR(this.g.getImageData(0, 0, this.c.width, this.c.height).data, this.c.width, this.c.height);
+        if (!hit) { this.seen = 0; return []; }
+        this.seen ||= performance.now();
+        if (performance.now() - this.seen < hold) return [];
+        return [{ rawValue: hit.data === from ? to : hit.data, format: "qr_code" }];
+      }
+    };
+  }, from, to, hold);
+};
+
 async function scan(browser, auth) {
-  const page = await session(browser, auth, "/home", { tour: "home-v2", before: hideToasts });
+  const page = await session(browser, auth, "/home", {
+    tour: "home-v2",
+    before: async (p) => { await hideToasts(p); await decodeAs(p, PLAY_URL, SHOP_QR); },
+  });
   await tourTo(page, "Scanner.");
   await sleep(600);
   const { webm, marks } = await record(page, "scan", async (mark) => {
@@ -371,7 +482,7 @@ async function scan(browser, auth) {
     await sleep(1300);
     mark("end");
   });
-  encode("scan", webm, [[marks.start, marks.end]], [[marks.pay, marks.pending + 0.6]]);
+  encode("scan", webm, [[marks.start, marks.end]], [[marks.pay, marks.pending + 0.6]], { marks });
   await page.close();
 }
 scan.args = [`--use-fake-ui-for-media-stream`, `--use-fake-device-for-media-stream`, `--use-file-for-fake-video-capture=${CAMERA}`];
@@ -385,5 +496,7 @@ for (const name of pick.length ? pick : Object.keys(ALL)) {
   const auth = await mintSession();
   const browser = await launch(ALL[name].args ?? []);
   try { await ALL[name](browser, auth); } finally { await browser.close(); }
+  // the files the site serves are made from the new .mp4
+  if (name !== "home") execFileSync("sh", [`${SITE}/tools/video-variants.sh`, name], { stdio: "inherit" });
 }
 reseed(); // leave the stack as the stills show it

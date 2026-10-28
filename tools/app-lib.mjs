@@ -137,14 +137,24 @@ export async function slide(page, label, { steps = 24, ms = 26 } = {}) {
   }, label, steps, ms);
 }
 
-/** Reminders go to the send-push edge function, which the local stack does not serve. */
-export async function fakePush(page) {
+/**
+ * Reminders go to the send-push edge function, which the local stack does not serve.
+ * `patches` maps the end of a source path (e.g. "/_authenticated/home.tsx") to a
+ * function that rewrites the module as vite serves it; both share one handler,
+ * since a request can only be answered once.
+ */
+export async function fakePush(page, patches = {}) {
   await page.setRequestInterception(true);
-  page.on("request", (r) => {
+  page.on("request", async (r) => {
     if (r.url().includes("/functions/v1/send-push")) {
       const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "authorization, x-client-info, apikey, content-type, x-region", "access-control-allow-methods": "POST, OPTIONS" };
       if (r.method() === "OPTIONS") return r.respond({ status: 204, headers: cors });
       return r.respond({ status: 200, contentType: "application/json", headers: cors, body: JSON.stringify({ sent: 1 }) });
+    }
+    const fix = Object.entries(patches).find(([path]) => new URL(r.url()).pathname.endsWith(path));
+    if (fix) {
+      const res = await fetch(r.url());
+      return r.respond({ status: res.status, contentType: "text/javascript", body: fix[1](await res.text()) });
     }
     r.continue();
   });
@@ -157,6 +167,9 @@ export async function fakePush(page) {
 // public.merchant_payments to authenticated` for that (added by hand
 // 2026-10-27; without it the row never syncs and home keeps counting it).
 export const SHOP_QR = "upi://pay?pa=scan-at-your-own@risk&pn=Scan%20at%20your%20own%20risk&cu=INR";
+// What the standee in the scan clip's camera actually encodes, so a visitor who
+// scans it off the site lands on the app (see decodeAs in record-clips.mjs).
+export const PLAY_URL = "https://play.google.com/store/apps/details?id=app.splitfree.client";
 export const seedPendingShop = (p) => p.evaluateOnNewDocument((qr) => {
   if (sessionStorage.getItem("clip.pending-seeded")) return; // once: Split it removes it
   sessionStorage.setItem("clip.pending-seeded", "1");

@@ -13,6 +13,30 @@
     document.dispatchEvent(new CustomEvent(name, { detail }));
   };
 
+  // ------------------------------------------------ smooth scrolling (Lenis)
+  // Smooths the wheel and trackpad; touch keeps the platform's own scrolling.
+  // smoothTo() is every scroll the page makes by itself.
+  const lenis = !reduced && window.Lenis ? new window.Lenis({ lerp: 0.11 }) : null;
+  if (lenis) {
+    const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
+    requestAnimationFrame(raf);
+  }
+  const smoothTo = (top, { duration = 1.1, lock = false, done } = {}) => {
+    if (lenis) return lenis.scrollTo(top, { duration, lock, force: true, onComplete: done });
+    scrollTo({ top, behavior: reduced ? "auto" : "smooth" });
+    if (done) setTimeout(done, reduced ? 0 : duration * 1000);
+  };
+  // in-page links glide as well
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    const hash = a?.getAttribute("href");
+    const target = hash && hash.length > 1 ? document.querySelector(hash) : null;
+    if (!target || !lenis) return;
+    e.preventDefault();
+    smoothTo(target.getBoundingClientRect().top + scrollY);
+    history.pushState(null, "", hash);
+  });
+
   // -------------------------------------------------------------- opening
   const loader = $("#loader");
   const coinBox = $("#loader-coin");
@@ -99,6 +123,8 @@
       coin.classList.toggle("is-open", open);
       hole(open ? R * IN * s * -Math.cos((a * Math.PI) / 180) : 0, R * IN * s);
     });
+    // "split" and "free" slide out from behind the phone as it opens (site.css)
+    document.documentElement.classList.add("is-revealing");
     await tween(760, (e) => {
       const s = 1.3 + (S - 1.3) * ease.in(e);
       place(0, s, to, 0, false);
@@ -148,6 +174,7 @@
   const mark = $(".wordmark");
   const copy = $(".hero-copy");
   const narrow = matchMedia("(max-width: 899px)");
+  const phoneLayout = matchMedia("(max-width: 599px), (max-aspect-ratio: 21/20)"); // as site.css and stage.js
   const story = $("#story");
   const chapters = $$(".chapter");
   const steps = $$(".story-steps li");
@@ -159,7 +186,9 @@
     const fade = (el, speed) => {
       const o = clamp(1 - heroP * speed);
       el.style.opacity = String(o);
-      const y = -heroP * 60;
+      // On a phone the copy stays where it is while it fades: carried up with the
+      // page it would cross the phone, which grows into its story size behind it.
+      const y = el === copy && phoneLayout.matches ? scrollY - heroP * 30 : -heroP * 60;
       el.style.transform = el === copy ? `translate(-50%, ${y}px)` : narrow.matches ? `translateY(${y}px)` : `translateY(calc(-50% + ${y}px))`;
       el.style.visibility = o > 0 ? "" : "hidden";
     };
@@ -182,32 +211,40 @@
 
   // No WebGL: the flat phone plays the chapter's clip.
   const CLIPS = ["scan", "add", "remind", "settle"];
+  // as stage.js picks (tools/video-variants.sh): VP9 or H.264, the 540 cut on a phone
+  const clipExt = document.createElement("video").canPlayType('video/webm; codecs="vp9"') ? "webm" : "mp4";
+  const clipCut = matchMedia("(min-width: 600px) and (min-aspect-ratio: 21/20)").matches ? "" : "-540";
   const dom = $("#phone-dom");
   const domVideo = $("video", dom);
   function flat(i) {
     if (!document.documentElement.classList.contains("no-webgl")) return;
     if (i < 0) { dom.classList.remove("has-video"); domVideo.pause(); return; }
     domVideo.poster = `/assets/video/${CLIPS[i]}-poster.jpg`;
-    domVideo.src = `/assets/video/${CLIPS[i]}.mp4`;
+    domVideo.src = `/assets/video/${CLIPS[i]}${clipCut}.${clipExt}`;
     dom.classList.add("has-video");
     if (!reduced) domVideo.play().catch(() => {});
   }
   document.addEventListener("sf:nogl", () => flat(ch));
   domVideo.addEventListener("ended", () => {
-    emit("sf:clipend", { ch });
-    setTimeout(() => { if (domVideo.paused) { domVideo.currentTime = 0; domVideo.play().catch(() => {}); } }, 2600);
+    const i = ch, endedAt = performance.now();
+    emit("sf:clipend", { ch: i });
+    setTimeout(() => {
+      const adv = window.sfState?.["sf:advance"];
+      if (adv?.ch === i && adv.at >= endedAt) return; // moving on instead
+      if (domVideo.paused) { domVideo.currentTime = 0; domVideo.play().catch(() => {}); }
+    }, 1000);
   });
 
   // The first time through, a chapter whose clip has ended moves on to the
-  // next by itself if nobody touches the page for 2 s. Once per chapter: after
-  // that the visitor is in charge.
+  // next by itself if nobody touches the page for a second, instead of
+  // replaying. Once per chapter: after that the visitor is in charge.
   const advanced = new Set();
   let touchedAt = 0;
   for (const ev of ["wheel", "touchstart", "keydown", "pointerdown"]) addEventListener(ev, () => { touchedAt = performance.now(); }, { passive: true });
   function goTo(i) {
     const r = story.getBoundingClientRect();
     const top = scrollY + r.top + (r.height - innerHeight) * ((i + 0.1) / chapters.length);
-    scrollTo({ top, behavior: reduced ? "auto" : "smooth" });
+    smoothTo(top);
   }
   document.addEventListener("sf:clipend", (e) => {
     const i = e.detail.ch;
@@ -216,9 +253,18 @@
     setTimeout(() => {
       if (ch !== i || touchedAt > endedAt || document.hidden) return;
       advanced.add(i);
+      emit("sf:advance", { ch: i, at: performance.now() }); // before the 1 s replay fires
       goTo(i + 1);
-    }, 2000);
+    }, 900);
   });
+
+  // After the last chapter's clip has played once, a nudge to keep going down.
+  // With reduced motion the clips do not play, so it comes a moment after the
+  // last chapter opens instead.
+  const nextCue = $(".story-next");
+  const last = chapters.length - 1;
+  document.addEventListener("sf:clipend", (e) => { if (e.detail.ch === last) nextCue?.classList.add("is-on"); });
+  if (reduced) document.addEventListener("sf:scroll", (e) => { if (e.detail.ch === last) setTimeout(() => nextCue?.classList.add("is-on"), 1500); });
 
   let ticking = false;
   const onScroll = () => {
@@ -251,6 +297,13 @@
       raf ||= requestAnimationFrame(apply);
     });
     dock.addEventListener("pointerleave", () => { mx = null; raf ||= requestAnimationFrame(apply); });
+    // a click flips the coin, with its sound
+    dock.addEventListener("click", (e) => {
+      const c = e.target.closest("img");
+      if (!c) return;
+      window.sfCoinSound?.();
+      c.classList.remove("flip"); void c.offsetWidth; c.classList.add("flip");
+    });
   }
 
   // One answer open at a time, where the browser does not do it from name=.

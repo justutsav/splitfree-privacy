@@ -1,4 +1,22 @@
+# Search engines and AI assistants are welcome to read, index and cite this site.
+# A plain-text summary written for language models: https://splitfree.justutsav.com/llms.txt
+
 User-agent: *
+Allow: /
+Disallow: /reset-password
+
+# Named so a crawler that only reads its own group still finds it allowed.
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: CCBot
 Allow: /
 Disallow: /reset-password
 
