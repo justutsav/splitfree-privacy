@@ -123,13 +123,22 @@
       coin.classList.toggle("is-open", open);
       hole(open ? R * IN * s * -Math.cos((a * Math.PI) / 180) : 0, R * IN * s);
     });
-    // "split" and "free" slide out from behind the phone as it opens (site.css)
-    document.documentElement.classList.add("is-revealing");
+    // The wordmark's entrance (site.css: split and free slide out from behind
+    // the phone; on a phone the word rises from behind its top) starts the
+    // moment the opening hole first reaches the words, so all of it is seen.
+    const cx = innerWidth / 2, cy = innerHeight / 2;
+    const reach = Math.min(...$$(".wordmark span").map((el) => {
+      const r = el.getBoundingClientRect();
+      return Math.hypot(Math.max(r.left - cx, 0, cx - r.right), Math.max(r.top - cy, 0, cy - r.bottom));
+    }));
+    const words = () => document.documentElement.classList.add("is-revealing");
     await tween(760, (e) => {
       const s = 1.3 + (S - 1.3) * ease.in(e);
       place(0, s, to, 0, false);
       hole(R * IN * s, R * IN * s);
+      if (R * IN * s >= reach) words();
     });
+    words();
     finish();
   }
   function finish() {
